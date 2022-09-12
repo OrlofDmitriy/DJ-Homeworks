@@ -39,13 +39,12 @@ class StockSerializer(serializers.ModelSerializer):
         # здесь вам надо заполнить связанные таблицы
         # в нашем случае: таблицу StockProduct
         # с помощью списка positions
-        for i in positions:
-            StockProduct.objects.create(
-                stock=stock,
-                product=i.get('product'),
-                quantity=i.get('quantity'),
-                price=i.get('price'),
-            )
+        for position in positions:
+            StockProduct.objects.create(stock=stock,
+                                        product=position['product'],
+                                        quantity=position['quantity'],
+                                        price=position['price']
+                                        )
 
         return stock
 
@@ -59,19 +58,10 @@ class StockSerializer(serializers.ModelSerializer):
         # здесь вам надо обновить связанные таблицы
         # в нашем случае: таблицу StockProduct
         # с помощью списка positions
-        for i in positions:
-            q = StockProduct.objects.filter(product=i.get('product'), stock=stock)
-            if q:
-                q.update(
-                    quantity=i.get('quantity'),
-                    price=i.get('price'),
-                )
-            else:
-                StockProduct.objects.create(
-                    stock=stock,
-                    product=i.get('product'),
-                    quantity=i.get('quantity'),
-                    price=i.get('price'),
-                )
+        for position in positions:
+            StockProduct.objects.update_or_create(defaults=position,
+                                                  product=position['product'],
+                                                  stock_id=stock.pk,
+                                                  )
 
         return stock
